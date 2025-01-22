@@ -2,6 +2,9 @@ import soot.*;
 import soot.options.Options;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
+import soot.toolkits.scalar.FlowSet;
+
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -25,15 +28,14 @@ public class Main {
 
             // Create a UnitGraph for the method
             UnitGraph graph = new BriefUnitGraph(body);
-//            System.out.println(graph);
             // Run Reaching Definitions Analysis
-//            System.out.println("\n---May Reaching Definitions Analysis ---");
-//            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph , method);
-//            for (Unit unit : graph) {
-//                System.out.println("At " + unit + ":");
-//                System.out.println("  MayReaching Definitions Before: " + mayreachingDefinitions.getFlowBefore(unit));
-//                System.out.println("  MayReaching Definitions After: " + mayreachingDefinitions.getFlowAfter(unit));
-//            }
+            System.out.println("\n---May Reaching Definitions Analysis ---");
+            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph , method);
+            for (Unit unit : graph) {
+                System.out.println("At " + unit + ":");
+                System.out.println("  MayReaching Definitions Before: " + mayreachingDefinitions.getFlowBefore(unit));
+                System.out.println("  MayReaching Definitions After: " + mayreachingDefinitions.getFlowAfter(unit));
+            }
 
             System.out.println("\n---Must Reaching Definitions Analysis ---");
             MustReachingDefinitions mustreachingDefinitions = new MustReachingDefinitions(graph , method);
@@ -44,35 +46,31 @@ public class Main {
             }
 
 //             Run Live Variable Analysis
-//            System.out.println("\n--- Possible Live Variable Analysis ---");
-//            PossibleLiveVariableAnalysis possibleLiveVariableAnalysis = new PossibleLiveVariableAnalysis(graph);
-//            for (Unit unit : graph) {
-//                System.out.println("At " + unit + ":");
-//                System.out.println("  Live Variables Before: " + possibleLiveVariableAnalysis.getFlowBefore(unit));
-//                System.out.println("  Live Variables After: " + possibleLiveVariableAnalysis.getFlowAfter(unit));
-//            }
+            System.out.println("\n--- Possible Live Variable Analysis ---");
+            PossibleLiveVariableAnalysis possibleLiveVariableAnalysis = new PossibleLiveVariableAnalysis(graph);
+            for (Unit unit : graph) {
+                System.out.println("At " + unit + ":");
+                System.out.println("  Live Variables Before: " + possibleLiveVariableAnalysis.getFlowBefore(unit));
+                System.out.println("  Live Variables After: " + possibleLiveVariableAnalysis.getFlowAfter(unit));
+            }
 
-//            System.out.println("\n--- Definite Live Variable Analysis ---");
-//            DefiniteLiveVariableAnalysis definiteLiveVariableAnalysis = new DefiniteLiveVariableAnalysis(graph);
-//            for (Unit unit : graph) {
-//                System.out.println("At " + unit + ":");
-//                System.out.println("  Live Variables Before: " + definiteLiveVariableAnalysis.getFlowBefore(unit));
-//                System.out.println("  Live Variables After: " + definiteLiveVariableAnalysis.getFlowAfter(unit));
-//            }
+            System.out.println("\n--- Definite Live Variable Analysis ---");
+            DefiniteLiveVariableAnalysis definiteLiveVariableAnalysis = new DefiniteLiveVariableAnalysis(graph);
+            for (Unit unit : graph) {
+                System.out.println("At " + unit + ":");
+                System.out.println("  Live Variables Before: " + definiteLiveVariableAnalysis.getFlowBefore(unit));
+                System.out.println("  Live Variables After: " + definiteLiveVariableAnalysis.getFlowAfter(unit));
+            }
 
 //            // Run Pointer Analysis
-//            System.out.println("\n--- Pointer Analysis ---");
-//            PointerAnalysis pointerAnalysis = new PointerAnalysis(graph);
-//            for (Unit unit : graph) {
-//                System.out.println("At " + unit + ":");
-//                System.out.println("  Aliases Before: " + pointerAnalysis.getFlowBefore(unit));
-//                System.out.println("  Aliases After: " + pointerAnalysis.getFlowAfter(unit));
-//            }
-//
-//            // Additional: Points-to Sets for Pointer Analysis
-//            System.out.println("\n--- Points-to Sets ---");
-//            Map<Value, FlowSet<Value>> pointsToSets = pointerAnalysis.getPointsToSets();
-//            pointsToSets.forEach((key, value) -> System.out.println(key + " -> " + value));
+            System.out.println("\n--- Pointer Analysis ---");
+            PointerAnalysis pointerAnalysis = new PointerAnalysis(graph);
+            for (Unit unit : graph) {
+                System.out.println("At " + unit + ":");
+                System.out.println("  Aliases Before: " + pointerAnalysis.getFlowBefore(unit));
+                System.out.println("  Aliases After: " + pointerAnalysis.getFlowAfter(unit));
+            }
+
 
         } else {
             System.out.println("Method not found: " + targetMethod);
