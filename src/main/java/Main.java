@@ -28,7 +28,7 @@ public class Main {
 //            System.out.println(graph);
             // Run Reaching Definitions Analysis
             System.out.println("\n---May Reaching Definitions Analysis ---");
-            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph);
+            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph , method);
             for (Unit unit : graph) {
                 System.out.println("At " + unit + ":");
                 System.out.println("  MayReaching Definitions Before: " + mayreachingDefinitions.getFlowBefore(unit));

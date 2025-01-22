@@ -1,3 +1,5 @@
+import soot.Local;
+import soot.SootMethod;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
@@ -9,8 +11,11 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
 
 public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet<MayReachingDefinitions.Definition>> {
 
-    public MayReachingDefinitions(UnitGraph graph) {
+    private final soot.SootMethod method;
+
+    public MayReachingDefinitions(UnitGraph graph, soot.SootMethod method) {
         super(graph);
+        this.method = method;
         doAnalysis();
     }
 
@@ -50,10 +55,15 @@ public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet<Ma
     }
 
     @Override
-    protected FlowSet entryInitialFlow() {
-        return new ArraySparseSet();
+    protected FlowSet<Definition> entryInitialFlow() {
+        FlowSet<Definition> initialFlow = new ArraySparseSet<>();
+        int parameterCount = method.getParameterCount();
+        for (int i = 0; i < parameterCount; i++) {
+            Local parameterLocal = method.getActiveBody().getParameterLocal(i);
+            initialFlow.add(new Definition(parameterLocal, graph.getHeads().get(0)));
+        }
+        return initialFlow;
     }
-
     @Override
     protected void merge(FlowSet in1, FlowSet in2, FlowSet out) {
         // Union of two sets
