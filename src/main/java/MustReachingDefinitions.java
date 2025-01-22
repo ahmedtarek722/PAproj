@@ -1,3 +1,4 @@
+import soot.Local;
 import soot.Unit;
 import soot.Value;
 import soot.jimple.AssignStmt;
@@ -9,32 +10,53 @@ import soot.toolkits.scalar.ForwardFlowAnalysis;
 
 public class MustReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet<MustReachingDefinitions.Definition>> {
 
-    public MustReachingDefinitions(UnitGraph graph) {
+    private final soot.SootMethod method;
+
+    public MustReachingDefinitions(UnitGraph graph, soot.SootMethod method) {
         super(graph);
+        this.method = method;
         doAnalysis();
     }
 
-    @Override
-    protected void flowThrough(FlowSet<Definition> in, Unit unit, FlowSet<Definition> out) {
-        // Copy the input set to the output set
-        in.copy(out);
 
-        // If the statement is an assignment, process it
-        if (unit instanceof AssignStmt) {
-            AssignStmt assignStmt = (AssignStmt) unit;
+@Override
+protected void flowThrough(FlowSet<Definition> in, Unit unit, FlowSet<Definition> out) {
+    // Copy the input set to the output set
+    in.copy(out);
 
-            // Get the left-hand side (variable being defined)
-            Value leftOp = assignStmt.getLeftOp();
+    // Process assignments
+    if (unit instanceof AssignStmt) {
+        AssignStmt assignStmt = (AssignStmt) unit;
 
-            // Remove previous definitions of this variable from out
-            if (leftOp instanceof JimpleLocal) {
-                out.remove(new Definition(leftOp, unit));
+        // Get the left-hand side (variable being defined)
+        Value leftOp = assignStmt.getLeftOp();
+
+        if (leftOp instanceof JimpleLocal) {
+            // Remove previous definitions of this variable
+            FlowSet<Definition> temp = new ArraySparseSet<>();
+            for (Definition def : out) {
+                if (!def.variable.equals(leftOp)) {
+                    temp.add(def);
+                }
             }
+            out.clear();
+            out.union(temp);
 
             // Add the new definition to the out set
             out.add(new Definition(leftOp, unit));
         }
     }
+
+    // Ensure parameter definitions are preserved
+    for (Local parameter : method.getActiveBody().getParameterLocals()) {
+        for (Definition def : in) {
+            if (def.variable.equals(parameter)) {
+                out.add(def);
+            }
+        }
+    }
+}
+
 
     @Override
     protected FlowSet<Definition> newInitialFlow() {
@@ -44,15 +66,32 @@ public class MustReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet<M
 
     @Override
     protected FlowSet<Definition> entryInitialFlow() {
-        // The entry flow set is empty for must analysis
-        return new ArraySparseSet<>();
-    }
-
+        FlowSet<Definition> initialFlow = new ArraySparseSet<>();
+        int parameterCount = method.getParameterCount();
+        for (int i = 0; i < parameterCount; i++) {
+            Local parameterLocal = method.getActiveBody().getParameterLocal(i);
+            initialFlow.add(new Definition(parameterLocal, graph.getHeads().get(0)));
+        }
+        return initialFlow;
+}
     @Override
     protected void merge(FlowSet<Definition> in1, FlowSet<Definition> in2, FlowSet<Definition> out) {
-        // Perform intersection of in1 and in2 for must analysis
-        in1.intersection(in2, out);
+        FlowSet<Definition> temp = new ArraySparseSet<>();
+        in1.intersection(in2, temp);
+
+        // Ensure parameter definitions are preserved
+        for (Local parameter : method.getActiveBody().getParameterLocals()) {
+            for (Definition def : in1) {
+                if (def.variable.equals(parameter)) {
+                    temp.add(def);
+                }
+            }
+        }
+
+        out.clear();
+        out.union(temp);
     }
+
 
     @Override
     protected void copy(FlowSet<Definition> source, FlowSet<Definition> dest) {

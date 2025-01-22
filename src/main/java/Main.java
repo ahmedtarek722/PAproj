@@ -27,21 +27,21 @@ public class Main {
             UnitGraph graph = new BriefUnitGraph(body);
 //            System.out.println(graph);
             // Run Reaching Definitions Analysis
-            System.out.println("\n---May Reaching Definitions Analysis ---");
-            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph , method);
-            for (Unit unit : graph) {
-                System.out.println("At " + unit + ":");
-                System.out.println("  MayReaching Definitions Before: " + mayreachingDefinitions.getFlowBefore(unit));
-                System.out.println("  MayReaching Definitions After: " + mayreachingDefinitions.getFlowAfter(unit));
-            }
-
-//            System.out.println("\n---Must Reaching Definitions Analysis ---");
-//            MustReachingDefinitions mustreachingDefinitions = new MustReachingDefinitions(graph);
+//            System.out.println("\n---May Reaching Definitions Analysis ---");
+//            MayReachingDefinitions mayreachingDefinitions = new MayReachingDefinitions(graph , method);
 //            for (Unit unit : graph) {
 //                System.out.println("At " + unit + ":");
-//                System.out.println("  MustReaching Definitions Before: " + mustreachingDefinitions.getFlowBefore(unit));
-//                System.out.println("  MustReaching Definitions After: " + mustreachingDefinitions.getFlowAfter(unit));
+//                System.out.println("  MayReaching Definitions Before: " + mayreachingDefinitions.getFlowBefore(unit));
+//                System.out.println("  MayReaching Definitions After: " + mayreachingDefinitions.getFlowAfter(unit));
 //            }
+
+            System.out.println("\n---Must Reaching Definitions Analysis ---");
+            MustReachingDefinitions mustreachingDefinitions = new MustReachingDefinitions(graph , method);
+            for (Unit unit : graph) {
+                System.out.println("At " + unit + ":");
+                System.out.println("  MustReaching Definitions Before: " + mustreachingDefinitions.getFlowBefore(unit));
+                System.out.println("  MustReaching Definitions After: " + mustreachingDefinitions.getFlowAfter(unit));
+            }
 
 //             Run Live Variable Analysis
 //            System.out.println("\n--- Possible Live Variable Analysis ---");
