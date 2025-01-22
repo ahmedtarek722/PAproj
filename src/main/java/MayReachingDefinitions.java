@@ -7,7 +7,7 @@ import soot.toolkits.scalar.ArraySparseSet;
 import soot.toolkits.scalar.FlowSet;
 import soot.toolkits.scalar.ForwardFlowAnalysis;
 
-public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet> {
+public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet<MayReachingDefinitions.Definition>> {
 
     public MayReachingDefinitions(UnitGraph graph) {
         super(graph);
@@ -15,7 +15,7 @@ public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet> {
     }
 
     @Override
-    protected void flowThrough(FlowSet in, Unit unit, FlowSet out) {
+    protected void flowThrough(FlowSet<Definition> in, Unit unit, FlowSet<Definition> out) {
         // Copy the input set to the output set
         in.copy(out);
 
@@ -26,15 +26,23 @@ public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet> {
             // Get the left-hand side (variable being defined)
             Value leftOp = assignStmt.getLeftOp();
 
-            // Remove previous definitions of this variable from out
             if (leftOp instanceof JimpleLocal) {
-                out.remove(new Definition(leftOp, unit));
-            }
+                // Remove all previous definitions of this variable
+                FlowSet<Definition> temp = new ArraySparseSet<>();
+                for (Definition def : out) {
+                    if (!def.variable.equals(leftOp)) {
+                        temp.add(def); // Keep definitions for other variables
+                    }
+                }
+                out.clear();
+                out.union(temp);
 
-            // Add the new definition to the out set
-            out.add(new Definition(leftOp, unit));
+                // Add the new definition to the out set
+                out.add(new Definition(leftOp, unit));
+            }
         }
     }
+
 
     @Override
     protected FlowSet newInitialFlow() {
@@ -59,7 +67,7 @@ public class MayReachingDefinitions extends ForwardFlowAnalysis<Unit, FlowSet> {
     }
 
     // Helper class to represent a definition (variable and statement)
-    private static class Definition {
+    public static class Definition {
         private final Value variable;
         private final Unit statement;
 
